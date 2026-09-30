@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 
 export const getStoredToken = () => localStorage.getItem('ciet_mech_token');
 export const setStoredToken = (token) => localStorage.getItem('ciet_mech_token') !== token && localStorage.setItem('ciet_mech_token', token);
@@ -20,10 +20,15 @@ const request = async (endpoint, options = {}) => {
     delete headers['Content-Type'];
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch {
+    throw new Error('Unable to reach the API server. Check that it is running and that VITE_API_BASE_URL is configured for this deployment.');
+  }
 
   const contentType = res.headers.get('content-type') || '';
   let data = null;
@@ -34,7 +39,13 @@ const request = async (endpoint, options = {}) => {
   }
 
   if (!res.ok) {
-    const errorMsg = data?.message || data || `Request failed with status ${res.status}`;
+    const errorMsg = data?.message || (
+      typeof data === 'string' && !/<\s*html[\s>]/i.test(data)
+        ? data
+        : res.status === 404
+          ? 'API endpoint not found. Check VITE_API_BASE_URL and confirm it includes /api.'
+          : `Request failed with status ${res.status}`
+    );
     throw new Error(errorMsg);
   }
 

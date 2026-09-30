@@ -4,12 +4,20 @@ The portal uses React/Vite on the frontend, Express for the API, and local JSON 
 
 ## Run locally
 
+Create a `.env` file from `.env.example` and replace `JWT_SECRET` with a long,
+random value before starting the API. Do not commit `.env`.
+
 ```bash
 npm install
 npm run dev
 ```
 
 Vite runs on `http://localhost:5173` and proxies `/api` and `/uploads` to Express on `http://localhost:4000`.
+For a separately hosted frontend and API, set the frontend build variable
+`VITE_API_BASE_URL` to the API origin including `/api` (for example,
+`https://your-api-host.example.com/api`). The API host must allow requests from
+the frontend origin; no cloud database or storage credentials are used by the
+registration flow.
 
 ## Official R2023 Curriculum
 

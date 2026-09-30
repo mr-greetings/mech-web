@@ -14,7 +14,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
-const JWT_SECRET = process.env.JWT_SECRET || 'ciet-mech-dev-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required. Set it in the server environment before starting the API.');
+}
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
@@ -1198,90 +1201,113 @@ app.get('/api/feed', (_req, res) => {
 
 // --- Auth Routes ---
 app.post('/api/auth/register', (req, res) => {
-  const { name, email, password, role = 'student', registerNumber, batch, academicYear, section, yearOfStudy, designation, qualification, specialization, phone } = req.body;
-  const data = getDb();
+  const input = req.body || {};
+  const name = typeof input.name === 'string' ? input.name.trim() : '';
+  const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+  const password = typeof input.password === 'string' ? input.password : '';
+  const role = input.role || 'student';
+  const registerNumber = typeof input.registerNumber === 'string' ? input.registerNumber.trim().toUpperCase() : '';
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Name, email, and password are required.' });
   }
-
-  const existing = data.users.find((u) => u.email.toLowerCase() === String(email).trim().toLowerCase());
-  if (existing) {
-    return res.status(409).json({ message: 'An account with this email address already exists.' });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: 'Please provide a valid email address.' });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters long.' });
+  }
+  if (!['student', 'staff'].includes(role)) {
+    return res.status(400).json({ message: 'Role must be either student or staff.' });
+  }
+  if (role === 'student' && !registerNumber) {
+    return res.status(400).json({ message: 'A student registration number is required.' });
   }
 
-  const userId = `user-${Date.now()}`;
-  const passwordHash = bcrypt.hashSync(password, 10);
-  let studentId = '';
-  let staffId = '';
+  try {
+    const data = getDb();
+    const existing = data.users.find((user) => user.email.toLowerCase() === email);
+    if (existing) {
+      return res.status(409).json({ message: 'An account with this email address already exists.' });
+    }
+    if (role === 'student' && data.students.some((student) => student.registerNumber?.toUpperCase() === registerNumber)) {
+      return res.status(409).json({ message: 'A student with this registration number already exists.' });
+    }
 
-  if (role === 'student') {
-    studentId = `student-${Date.now()}`;
-    const newStudent = {
-      id: studentId,
-      userId,
+    const userId = `user-${Date.now()}`;
+    const passwordHash = bcrypt.hashSync(password, 10);
+    let studentId = '';
+    let staffId = '';
+
+    if (role === 'student') {
+      studentId = `student-${Date.now()}`;
+      data.students.push({
+        id: studentId,
+        userId,
+        name,
+        registerNumber,
+        batch: input.batch || '2025 — 2029',
+        academicYear: input.academicYear || '2025-2029',
+        section: input.section || 'A',
+        yearOfStudy: input.yearOfStudy || 'II Year',
+        email,
+        phone: typeof input.phone === 'string' ? input.phone.trim() : '',
+        profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+        skills: ['CAD Design', 'Engineering Mechanics'],
+        about: 'Mechanical engineering undergraduate student at CIET Coimbatore.',
+        projects: [],
+        achievements: [],
+        certificates: [],
+        eventsParticipated: [],
+        galleryImages: [],
+        socialLinks: { linkedin: '', github: '', instagram: '' },
+      });
+    } else {
+      staffId = `staff-${Date.now()}`;
+      data.staff.push({
+        id: staffId,
+        userId,
+        name,
+        designation: input.designation || 'Assistant Professor',
+        qualification: input.qualification || 'M.E. (Mechanical Engineering)',
+        specialization: input.specialization || 'Mechanical Engineering',
+        experience: '3 Years',
+        email,
+        phone: typeof input.phone === 'string' ? input.phone.trim() : '',
+        profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+        about: 'Faculty member in the Department of Mechanical Engineering, CIET.',
+        publications: '',
+        areasOfInterest: ['Manufacturing', 'Machine Design'],
+      });
+    }
+
+    const newUser = {
+      id: userId,
       name,
-      registerNumber: registerNumber || `26ME${Math.floor(100 + Math.random() * 900)}`,
-      batch: batch || '2025 — 2029',
-      academicYear: academicYear || '2025-2029',
-      section: section || 'A',
-      yearOfStudy: yearOfStudy || 'II Year',
       email,
-      phone: phone || '',
-      profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-      skills: ['CAD Design', 'Engineering Mechanics'],
-      about: 'Mechanical engineering undergraduate student at CIET Coimbatore.',
-      projects: [],
-      achievements: [],
-      certificates: [],
-      eventsParticipated: [],
-      galleryImages: [],
-      socialLinks: { linkedin: '', github: '', instagram: '' },
+      passwordHash,
+      role,
+      phone: typeof input.phone === 'string' ? input.phone.trim() : '',
+      department: 'Mechanical Engineering',
+      studentId,
+      staffId,
+      registerNumber,
+      createdAt: new Date().toISOString(),
     };
-    data.students.push(newStudent);
-  } else if (role === 'staff') {
-    staffId = `staff-${Date.now()}`;
-    const newStaff = {
-      id: staffId,
-      userId,
-      name,
-      designation: designation || 'Assistant Professor',
-      qualification: qualification || 'M.E. (Mechanical Engineering)',
-      specialization: specialization || 'Mechanical Engineering',
-      experience: '3 Years',
-      email,
-      phone: phone || '',
-      profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
-      about: 'Faculty member in the Department of Mechanical Engineering, CIET.',
-      publications: '',
-      areasOfInterest: ['Manufacturing', 'Machine Design'],
-    };
-    data.staff.push(newStaff);
+
+    data.users.push(newUser);
+    saveDb(data);
+
+    const token = signToken(newUser);
+    return res.status(201).json({
+      message: 'Account registered successfully.',
+      token,
+      user: sanitizeUser(newUser),
+    });
+  } catch (error) {
+    console.error('[auth/register] Registration failed:', error.message);
+    return res.status(500).json({ message: 'Registration could not be completed. Please try again later.' });
   }
-
-  const newUser = {
-    id: userId,
-    name,
-    email,
-    passwordHash,
-    role,
-    phone: phone || '',
-    department: 'Mechanical Engineering',
-    studentId,
-    staffId,
-    registerNumber: registerNumber || '',
-    createdAt: new Date().toISOString(),
-  };
-
-  data.users.push(newUser);
-  saveDb(data);
-
-  const token = signToken(newUser);
-  res.status(201).json({
-    message: 'Account registered successfully.',
-    token,
-    user: sanitizeUser(newUser),
-  });
 });
 
 app.post('/api/auth/login', (req, res) => {
@@ -2178,7 +2204,13 @@ app.use((error, _req, res, _next) => {
     return res.status(400).json({ message: `Upload error: ${error.message}` });
   }
   if (error) {
-    return res.status(400).json({ message: error.message || 'Server error occurred.' });
+    const status = Number(error.status || error.statusCode) || 500;
+    if (status >= 500) {
+      console.error('[api] Request failed:', error.message);
+    }
+    return res.status(status).json({
+      message: status >= 500 ? 'Internal server error.' : error.message || 'Request could not be processed.',
+    });
   }
   return res.status(500).json({ message: 'Internal server error.' });
 });
