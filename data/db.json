@@ -1,0 +1,231 @@
+{
+  "users": [
+    {
+      "id": "user-admin-1",
+      "name": "Admin Desk",
+      "email": "admin@ciet.ac.in",
+      "passwordHash": "$2b$10$OYUjpzLIYnHlUEXng1TOM.BqDCb11YAVxRylfl70N839kgc4kY6G.",
+      "role": "admin",
+      "phone": "+91 94430 12345",
+      "department": "Mechanical Engineering",
+      "createdAt": "2026-09-25T09:46:20.214Z"
+    },
+    {
+      "id": "user-1790588483077",
+      "name": "Madhan k",
+      "email": "madhanrocks64@gmail.com",
+      "passwordHash": "$2b$10$/B7BqGbmK/epKjCKQjd.9uf8dao4dlOHJsTRz/AqFkzkcuPSNOjQe",
+      "role": "student",
+      "phone": "+91 8438812938",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790588483138",
+      "staffId": "",
+      "registerNumber": "25BITL01",
+      "createdAt": "2026-09-28T09:41:23.138Z"
+    },
+    {
+      "id": "user-1790751667393",
+      "name": "Pratheep.V",
+      "email": "pradeep.v.ciet@gmail.com",
+      "passwordHash": "$2b$10$2LA05dbaacJlW0rnup50nuS1d/LO79HBbeIFf2zjczbcYiI2pIK7i",
+      "role": "student",
+      "phone": "882557778",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790751667491",
+      "staffId": "",
+      "registerNumber": "71052405017",
+      "createdAt": "2026-09-30T07:01:07.491Z"
+    },
+    {
+      "id": "user-1790752420544",
+      "name": "raj",
+      "email": "raj.@gmail.com",
+      "passwordHash": "$2b$10$50n/W9mdk26LUsx30cKUS.w0zHFvTVIEKaoe9j6kB6R7mwr9AE4.S",
+      "role": "staff",
+      "phone": "9876542101",
+      "department": "Mechanical Engineering",
+      "studentId": "",
+      "staffId": "staff-1790752420657",
+      "registerNumber": "",
+      "createdAt": "2026-09-30T07:13:40.657Z"
+    }
+  ],
+  "batches": [],
+  "staff": [
+    {
+      "id": "staff-1790752420657",
+      "userId": "user-1790752420544",
+      "name": "raj",
+      "designation": "Head of Department",
+      "qualification": "M.E.",
+      "specialization": "Thermal / CAD / Manufacturing",
+      "experience": "3 Years",
+      "email": "raj.@gmail.com",
+      "phone": "9876542101",
+      "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+      "about": "Faculty member in the Department of Mechanical Engineering, CIET.",
+      "publications": "",
+      "areasOfInterest": [
+        "Manufacturing",
+        "Machine Design"
+      ]
+    }
+  ],
+  "students": [
+    {
+      "id": "student-1790588483138",
+      "userId": "user-1790588483077",
+      "name": "Madhan k",
+      "registerNumber": "25BITL01",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "madhanrocks64@gmail.com",
+      "phone": "+91 8438812938",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1790751667491",
+      "userId": "user-1790751667393",
+      "name": "Pratheep.V",
+      "registerNumber": "71052405017",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "pradeep.v.ciet@gmail.com",
+      "phone": "882557778",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [
+        {
+          "id": "proj-1790751825882",
+          "title": "electric bike",
+          "description": "nhnfy",
+          "techStack": "afuiryy",
+          "github": "",
+          "liveDemo": "",
+          "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80"
+        }
+      ],
+      "achievements": [],
+      "certificates": [
+        {
+          "id": "cert-1790751888707",
+          "title": "soliworks",
+          "issuingOrganization": "autodesk",
+          "date": "2026-08-15",
+          "description": "",
+          "studentId": "student-1790751667491",
+          "studentName": "Pratheep.V",
+          "category": "Students",
+          "fileUrl": "/uploads/sample-brochure.pdf",
+          "createdAt": "2026-09-30T07:04:48.707Z"
+        },
+        {
+          "id": "cert-1790751936558",
+          "title": "excel",
+          "issuingOrganization": "mirosoft",
+          "date": "2026-07-08",
+          "description": "",
+          "studentId": "student-1790751667491",
+          "studentName": "Pratheep.V",
+          "category": "Students",
+          "fileUrl": "/uploads/sample-brochure.pdf",
+          "createdAt": "2026-09-30T07:05:36.558Z"
+        }
+      ],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    }
+  ],
+  "events": [],
+  "announcements": [],
+  "brochures": [],
+  "gallery": [],
+  "certificates": [
+    {
+      "id": "cert-1790751936558",
+      "title": "excel",
+      "issuingOrganization": "mirosoft",
+      "date": "2026-07-08",
+      "description": "",
+      "studentId": "student-1790751667491",
+      "studentName": "Pratheep.V",
+      "category": "Students",
+      "fileUrl": "/uploads/sample-brochure.pdf",
+      "createdAt": "2026-09-30T07:05:36.558Z"
+    },
+    {
+      "id": "cert-1790751888707",
+      "title": "soliworks",
+      "issuingOrganization": "autodesk",
+      "date": "2026-08-15",
+      "description": "",
+      "studentId": "student-1790751667491",
+      "studentName": "Pratheep.V",
+      "category": "Students",
+      "fileUrl": "/uploads/sample-brochure.pdf",
+      "createdAt": "2026-09-30T07:04:48.707Z"
+    }
+  ],
+  "alumni": [],
+  "saeClub": {
+    "title": "CIET SAE Collegiate Club (Society of Automotive Engineers)",
+    "motto": "Design. Build. Race. Inspire.",
+    "about": "The CIET SAE Collegiate Club is a premier student-run engineering collective that translates classroom theory into championship-grade race vehicles, electric mobility prototypes, and unmanned aerial crafts. With dedicated fabrication studios, machine tools, and dynamic testing tracks, our teams represent CIET in prestigious international competitions.",
+    "divisions": [],
+    "activities": [],
+    "events": [],
+    "members": [],
+    "achievements": [],
+    "projects": [],
+    "gallery": [],
+    "announcements": [],
+    "resumes": []
+  },
+  "departmentInfo": {
+    "collegeName": "Coimbatore Institute of Engineering and Technology (CIET)",
+    "departmentName": "Department of Mechanical Engineering",
+    "location": "Narasipuram Post, Thondamuthur (via), Coimbatore - 641 109, Tamil Nadu, India",
+    "googleMapsUrl": "https://maps.google.com/?q=CIET+College+Coimbatore+Tamil+Nadu",
+    "contactEmail": "mech@ciet.ac.in",
+    "contactPhone": "+91 8438812938",
+    "instagramUrl": "https://instagram.com/ciet_mech_official",
+    "linkedinUrl": "https://linkedin.com/school/ciet-coimbatore",
+    "youtubeUrl": "https://youtube.com/@ciet_coimbatore",
+    "establishedYear": "2001",
+    "vision": "To emerge as a renowned center of excellence in Mechanical Engineering education and research, fostering ethically committed, technically proficient, and innovative engineering leaders capable of advancing sustainable global technologies and serving industrial society.",
+    "mission": [],
+    "curriculum": [],
+    "syllabus": [],
+    "regulations": [],
+    "resumes": []
+  },
+  "resumes": []
+}
