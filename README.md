@@ -13,11 +13,19 @@ npm run dev
 ```
 
 Vite runs on `http://localhost:5173` and proxies `/api` and `/uploads` to Express on `http://localhost:4000`.
-For a separately hosted frontend and API, set the frontend build variable
-`VITE_API_BASE_URL` to the API origin including `/api` (for example,
-`https://your-api-host.example.com/api`). The API host must allow requests from
-the frontend origin; no cloud database or storage credentials are used by the
-registration flow.
+For a separately hosted frontend and API, deploy `server.js` as the Express API
+and set the frontend build variable `VITE_API_BASE_URL` to that API's origin,
+including `/api` (for example, `https://your-api-host.example.com/api`). Do not
+set it to the static frontend host unless that host proxies `/api` to Express.
+The API host must allow requests from the frontend origin.
+
+Registration and login use the API's local `data/db.json` file; uploads use the
+local `uploads/` directory. No Firebase, Supabase, or other cloud database or
+storage service is configured. A deployment using ephemeral server storage
+must provide persistent storage for these paths or replace the JSON/file
+storage layer with a managed database and object store before it can safely
+retain accounts and uploads across restarts. `JWT_SECRET` is server-only;
+`VITE_API_BASE_URL` is a public frontend setting and must not contain secrets.
 
 ## Official R2023 Curriculum
 

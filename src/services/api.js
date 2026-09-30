@@ -39,8 +39,11 @@ const request = async (endpoint, options = {}) => {
   }
 
   if (!res.ok) {
+    const isCloudNotFound = typeof data === 'string' && /^\s*cloud not found\.?\s*$/i.test(data);
     const errorMsg = data?.message || (
-      typeof data === 'string' && !/<\s*html[\s>]/i.test(data)
+      isCloudNotFound
+        ? 'The configured host could not find the API. Set VITE_API_BASE_URL to the deployed Express API URL, including /api, and verify that the API is running.'
+        : typeof data === 'string' && !/<\s*html[\s>]/i.test(data)
         ? data
         : res.status === 404
           ? 'API endpoint not found. Check VITE_API_BASE_URL and confirm it includes /api.'
