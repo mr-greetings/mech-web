@@ -48,6 +48,19 @@
       "staffId": "staff-1790752420657",
       "registerNumber": "",
       "createdAt": "2026-09-30T07:13:40.657Z"
+    },
+    {
+      "id": "user-1790794550056",
+      "name": "kumar",
+      "email": "kumar64@gmail.com",
+      "passwordHash": "$2b$10$yxiUs49b0AXwHwgJtf98reTnSu4h4hWgqqnhsT10AUqglHXlV.4JK",
+      "role": "student",
+      "phone": "8438812938",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790794551366",
+      "staffId": "",
+      "registerNumber": "25BITL09",
+      "createdAt": "2026-09-30T18:55:51.366Z"
     }
   ],
   "batches": [],
@@ -155,6 +168,34 @@
           "createdAt": "2026-09-30T07:05:36.558Z"
         }
       ],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1790794551366",
+      "userId": "user-1790794550056",
+      "name": "kumar",
+      "registerNumber": "25BITL09",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "kumar64@gmail.com",
+      "phone": "8438812938",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
       "eventsParticipated": [],
       "galleryImages": [],
       "socialLinks": {

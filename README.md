@@ -4,8 +4,10 @@ The portal uses React/Vite on the frontend, Express for the API, and local JSON 
 
 ## Run locally
 
-Create a `.env` file from `.env.example` and replace `JWT_SECRET` with a long,
-random value before starting the API. Do not commit `.env`.
+For local development, the server generates and reuses a random JWT secret in
+the ignored `.dev-jwt-secret` file if `JWT_SECRET` is not set. You can instead
+create `.env` from `.env.example` and set `JWT_SECRET` yourself. Production
+requires an explicitly configured `JWT_SECRET`; do not commit either secret file.
 
 ```bash
 npm install

@@ -3,6 +3,7 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import multer from 'multer';
+import { randomBytes } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,7 +15,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
-const JWT_SECRET = process.env.JWT_SECRET;
+let JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
+  const localSecretPath = path.join(__dirname, '.dev-jwt-secret');
+  try {
+    JWT_SECRET = fs.readFileSync(localSecretPath, 'utf8').trim();
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    JWT_SECRET = randomBytes(48).toString('hex');
+    try {
+      fs.writeFileSync(localSecretPath, JWT_SECRET, { flag: 'wx', mode: 0o600 });
+    } catch (writeError) {
+      if (writeError.code !== 'EEXIST') throw writeError;
+      JWT_SECRET = fs.readFileSync(localSecretPath, 'utf8').trim();
+    }
+    console.warn('Generated a local development JWT secret in .dev-jwt-secret. Set JWT_SECRET explicitly for production.');
+  }
+}
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is required. Set it in the server environment before starting the API.');
 }
