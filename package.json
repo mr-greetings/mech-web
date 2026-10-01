@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite --host 0.0.0.0\"",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "concurrently \"node server.js\" \"vite preview --host 0.0.0.0\"",
     "server": "node server.js"
   },
   "dependencies": {
