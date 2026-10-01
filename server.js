@@ -1102,12 +1102,27 @@ app.use('/uploads', express.static(uploadsDir));
 
 // --- Health ---
 app.get('/api/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    service: 'CIET Mechanical Engineering Department Portal API',
-    version: '2.0.0',
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    const database = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+    const collections = Object.keys(database).length;
+
+    res.json({
+      status: 'ok',
+      service: 'CIET Mechanical Engineering Department Portal API',
+      version: '2.0.0',
+      database: { status: 'connected', collections },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Database health check failed:', error.message);
+    res.status(503).json({
+      status: 'error',
+      service: 'CIET Mechanical Engineering Department Portal API',
+      version: '2.0.0',
+      database: { status: 'unavailable' },
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // --- Dynamic Feed ---

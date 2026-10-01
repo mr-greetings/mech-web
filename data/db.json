@@ -61,6 +61,32 @@
       "staffId": "",
       "registerNumber": "25BITL09",
       "createdAt": "2026-09-30T18:55:51.366Z"
+    },
+    {
+      "id": "user-1790835831653",
+      "name": "sarvesh",
+      "email": "sarvesh.v.ciet@gmail.com",
+      "passwordHash": "$2b$10$AEnLZSLkjxc0uR.Dqge9yuOg03sHf4uO/m8rsOR8gOOaha5u3keWS",
+      "role": "student",
+      "phone": "7708051783",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790835832534",
+      "staffId": "",
+      "registerNumber": "24BIT044",
+      "createdAt": "2026-10-01T06:23:52.535Z"
+    },
+    {
+      "id": "user-1790835973300",
+      "name": "ram",
+      "email": "ram.v.ciet@gmail.com",
+      "passwordHash": "$2b$10$1m3hFmR.N2eqgfbrbCd46OprrNQgvfecxKhaNQ3jTFI8gZOeq1GHO",
+      "role": "staff",
+      "phone": "1234567899",
+      "department": "Mechanical Engineering",
+      "studentId": "",
+      "staffId": "staff-1790835974115",
+      "registerNumber": "",
+      "createdAt": "2026-10-01T06:26:14.115Z"
     }
   ],
   "batches": [],
@@ -75,6 +101,24 @@
       "experience": "3 Years",
       "email": "raj.@gmail.com",
       "phone": "9876542101",
+      "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+      "about": "Faculty member in the Department of Mechanical Engineering, CIET.",
+      "publications": "",
+      "areasOfInterest": [
+        "Manufacturing",
+        "Machine Design"
+      ]
+    },
+    {
+      "id": "staff-1790835974115",
+      "userId": "user-1790835973300",
+      "name": "ram",
+      "designation": "Assistant Professor",
+      "qualification": "M.E.",
+      "specialization": "Thermal / CAD / Manufacturing",
+      "experience": "3 Years",
+      "email": "ram.v.ciet@gmail.com",
+      "phone": "1234567899",
       "profileImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
       "about": "Faculty member in the Department of Mechanical Engineering, CIET.",
       "publications": "",
@@ -187,6 +231,34 @@
       "yearOfStudy": "III Year",
       "email": "kumar64@gmail.com",
       "phone": "8438812938",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1790835832534",
+      "userId": "user-1790835831653",
+      "name": "sarvesh",
+      "registerNumber": "24BIT044",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "sarvesh.v.ciet@gmail.com",
+      "phone": "7708051783",
       "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
       "skills": [
         "CAD Design",
