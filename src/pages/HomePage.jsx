@@ -31,7 +31,7 @@ export const HomePage = ({ onNavigate, onSelectEvent }) => {
     try {
       setLoading(true);
       const data = await api.getFeed();
-      setFeedItems(data || []);
+      setFeedItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to load feed:', err);
     } finally {
@@ -44,7 +44,7 @@ export const HomePage = ({ onNavigate, onSelectEvent }) => {
   }, []);
 
   const filteredFeed = useMemo(() => {
-    return feedItems.filter((item) => {
+    return (Array.isArray(feedItems) ? feedItems : []).filter((item) => {
       const matchesFilter =
         activeFilter === 'ALL' ||
         (activeFilter === 'EVENTS' && item.type === 'EVENT') ||

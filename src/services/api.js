@@ -32,10 +32,13 @@ const request = async (endpoint, options = {}) => {
 
   const contentType = res.headers.get('content-type') || '';
   let data = null;
-  if (contentType.includes('application/json')) {
-    data = await res.json();
-  } else {
+  if (!contentType.includes('application/json')) {
     data = await res.text();
+    if (/<\s*html[\s>]/i.test(data) || contentType.includes('text/html')) {
+      throw new Error('The API URL returned the website instead of API data. Check the Vercel API function deployment and routing.');
+    }
+  } else {
+    data = await res.json();
   }
 
   if (!res.ok) {
