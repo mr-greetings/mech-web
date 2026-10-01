@@ -6,10 +6,13 @@
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite --host 0.0.0.0\"",
     "build": "vite build",
+    "postbuild": "node scripts/copy-upload-assets.js",
     "preview": "concurrently \"node server.js\" \"vite preview --host 0.0.0.0\"",
-    "server": "node server.js"
+    "server": "node server.js",
+    "migrate:supabase": "node scripts/migrate-supabase.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "@vitejs/plugin-react": "latest",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",

@@ -87,16 +87,83 @@
       "staffId": "staff-1790835974115",
       "registerNumber": "",
       "createdAt": "2026-10-01T06:26:14.115Z"
+    },
+    {
+      "id": "user-1790845640146",
+      "name": "Gokulakrishnan .S",
+      "email": "gokulakrishnan.s.ciet@gmail.com",
+      "passwordHash": "$2b$10$eA.DxmCYAJFseHfY6UhDOuT/rzsGiL5W3RCqzpXxPXaCVZPK8euLu",
+      "role": "student",
+      "phone": "9025441406",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790845641000",
+      "staffId": "",
+      "registerNumber": "71052405010",
+      "createdAt": "2026-10-01T09:07:21.000Z"
     }
   ],
   "batches": [],
   "staff": [],
-  "students": [],
+  "students": [
+    {
+      "id": "student-1790845641000",
+      "userId": "user-1790845640146",
+      "name": "Gokulakrishnan .S",
+      "registerNumber": "71052405010",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "gokulakrishnan.s.ciet@gmail.com",
+      "phone": "9025441406",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [
+        {
+          "id": "cert-1790846746288",
+          "title": "Academy of Indigenous Motor Sports ",
+          "issuingOrganization": "RVS Technical campus coimbatore",
+          "date": "2025-02-18",
+          "description": "good exprience for  us",
+          "studentId": "student-1790845641000",
+          "studentName": "Gokulakrishnan .S",
+          "category": "Students",
+          "fileUrl": "/uploads/1790846745916-WhatsApp-Image-2026-10-01-at-2.38.59-PM.jpeg",
+          "createdAt": "2026-10-01T09:25:46.288Z"
+        }
+      ],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    }
+  ],
   "events": [],
   "announcements": [],
   "brochures": [],
   "gallery": [],
   "certificates": [
+    {
+      "id": "cert-1790846746288",
+      "title": "Academy of Indigenous Motor Sports ",
+      "issuingOrganization": "RVS Technical campus coimbatore",
+      "date": "2025-02-18",
+      "description": "good exprience for  us",
+      "studentId": "student-1790845641000",
+      "studentName": "Gokulakrishnan .S",
+      "category": "Students",
+      "fileUrl": "/uploads/1790846745916-WhatsApp-Image-2026-10-01-at-2.38.59-PM.jpeg",
+      "createdAt": "2026-10-01T09:25:46.288Z"
+    },
     {
       "id": "cert-1790751936558",
       "title": "excel",

@@ -1,13 +1,13 @@
 # CIET Mechanical Engineering Portal
 
-The portal uses React/Vite on the frontend, Express for the API, and local JSON files under `data/` for persistence. It is not a Next.js, PostgreSQL, or Prisma project.
+The portal uses React/Vite on the frontend, Express for the API, and Supabase PostgreSQL/Storage for Vercel persistence. Local development can continue to use the JSON files under `data/`.
 
 ## Run locally
 
 For local development, the server generates and reuses a random JWT secret in
-the ignored `.dev-jwt-secret` file if `JWT_SECRET` is not set. You can instead
-create `.env` from `.env.example` and set `JWT_SECRET` yourself. Production
-requires an explicitly configured `JWT_SECRET`; do not commit either secret file.
+the ignored `.dev-jwt-secret` file if `JWT_SECRET` is not set. Copy `.env.example`
+to `.env` and set the Supabase values when importing data or using cloud storage.
+Never commit `.env`, `JWT_SECRET`, or `SUPABASE_SERVICE_ROLE_KEY`.
 
 ```bash
 npm install
@@ -15,19 +15,34 @@ npm run dev
 ```
 
 Vite runs on `http://localhost:5173` and proxies `/api` and `/uploads` to Express on `http://localhost:4000`.
-For a separately hosted frontend and API, deploy `server.js` as the Express API
-and set the frontend build variable `VITE_API_BASE_URL` to that API's origin,
-including `/api` (for example, `https://your-api-host.example.com/api`). Do not
-set it to the static frontend host unless that host proxies `/api` to Express.
-The API host must allow requests from the frontend origin.
+Vercel serves the Vite build and the Express API from the same project; `/api/*`
+is handled by `api/[...route].js`, and `/uploads/*` static files are copied into
+the build output. Registration, login, admin edits, and curriculum edits use
+the Supabase `portal_state` row in production. Uploaded files use the public
+`portal-uploads` Supabase Storage bucket. Local mode continues to use `data/`
+and `uploads/`.
 
-Registration and login use the API's local `data/db.json` file; uploads use the
-local `uploads/` directory. No Firebase, Supabase, or other cloud database or
-storage service is configured. A deployment using ephemeral server storage
-must provide persistent storage for these paths or replace the JSON/file
-storage layer with a managed database and object store before it can safely
-retain accounts and uploads across restarts. `JWT_SECRET` is server-only;
-`VITE_API_BASE_URL` is a public frontend setting and must not contain secrets.
+## Deploy to Vercel with Supabase
+
+1. In the Supabase SQL Editor, run `supabase/migrations/20261001000000_portal_state.sql`.
+2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and a long random `JWT_SECRET`
+	in the Vercel project's server environment variables. The service-role key
+	must never use a `VITE_` prefix or be exposed to browser code.
+3. Locally, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`. Set
+	unique `INITIAL_ADMIN_PASSWORD`, `INITIAL_STAFF_PASSWORD`, and
+	`INITIAL_STUDENT_PASSWORD` values there if their seeded accounts still use
+	their defaults, then run `npm run migrate:supabase` once to import
+	`data/db.json` and `data/r2023-curriculum.json`. The importer refuses to
+	overwrite existing data and rotates the known default account passwords.
+4. Redeploy the Vercel project. The frontend uses the same-origin `/api` by
+	default, so `VITE_API_BASE_URL` is not needed for this setup.
+5. Verify `https://<your-domain>/api/health` reports `status: ok` and
+	`database.status: connected` before testing registration.
+
+Vercel requests are limited to 4.5 MB, so cloud uploads are capped at 4 MB.
+The local development server retains its 10 MB limit.
+`VITE_API_BASE_URL` is only needed when hosting the frontend and API on different
+origins, and must point to the API origin including `/api`.
 
 ## Official R2023 Curriculum
 

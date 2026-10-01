@@ -134,23 +134,6 @@ export const AuthModal = ({ onClose, onSuccessRedirect }) => {
     }
   };
 
-  // Quick Demo Login helper
-  const handleQuickDemoLogin = (demoEmail, demoPassword) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    login(demoEmail, demoPassword)
-      .then((res) => {
-        addToast(`Signed in as ${res.user.name} (${res.user.role.toUpperCase()})`, 'success');
-        onClose();
-        if (onSuccessRedirect) {
-          if (res.user.role === 'admin') onSuccessRedirect('admin-dashboard');
-          else if (res.user.role === 'staff') onSuccessRedirect('staff-dashboard');
-          else if (res.user.role === 'student') onSuccessRedirect('student-dashboard');
-        }
-      })
-      .catch((err) => addToast(err.message, 'error'));
-  };
-
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-window auth-modal" onClick={(e) => e.stopPropagation()}>
@@ -176,22 +159,6 @@ export const AuthModal = ({ onClose, onSuccessRedirect }) => {
             {mode === 'reset' && 'Enter your new secure password.'}
           </p>
         </div>
-
-        {/* Quick Demo Logins Bar (for local development & evaluation) */}
-        {mode === 'login' && (
-          <div className="demo-accounts-bar">
-            <span className="demo-label">Administrator access:</span>
-            <div className="demo-chips">
-              <button
-                type="button"
-                className="demo-chip chip-admin"
-                onClick={() => handleQuickDemoLogin('admin@ciet.ac.in', 'Admin@123')}
-              >
-                Admin
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Mode: LOGIN */}
         {mode === 'login' && (

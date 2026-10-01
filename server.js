@@ -8,6 +8,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { AsyncLocalStorage } from 'async_hooks';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
@@ -15,6 +17,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
+const isVercel = process.env.VERCEL === '1';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
+  : null;
+const requestContext = new AsyncLocalStorage();
 let JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
   const localSecretPath = path.join(__dirname, '.dev-jwt-secret');
@@ -35,18 +44,22 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is required. Set it in the server environment before starting the API.');
 }
+if (isVercel && !supabase) {
+  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for the Vercel API.');
+}
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
 const curriculumPath = path.join(dbDir, 'r2023-curriculum.json');
 
-fs.mkdirSync(dbDir, { recursive: true });
-fs.mkdirSync(uploadsDir, { recursive: true });
+if (!isVercel) {
+  fs.mkdirSync(dbDir, { recursive: true });
+  fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Create a sample brochure PDF placeholder if not present
-const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
-if (!fs.existsSync(sampleBrochurePath)) {
-  fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
+  const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
+  if (!fs.existsSync(sampleBrochurePath)) {
+    fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
+  }
 }
 
 const buildInitialDatabase = () => {
@@ -937,9 +950,11 @@ const ensureSeedData = () => {
 };
 
 // Initialize DB
-let db = ensureSeedData();
+let db = supabase ? null : ensureSeedData();
 
 const getDb = () => {
+  const context = requestContext.getStore();
+  if (context) return context.payload.database;
   try {
     return JSON.parse(fs.readFileSync(dbPath, 'utf8'));
   } catch (err) {
@@ -948,8 +963,111 @@ const getDb = () => {
 };
 
 const saveDb = (data) => {
+  const context = requestContext.getStore();
+  if (context) {
+    context.payload.database = data;
+    context.dirty = true;
+    return;
+  }
   db = data;
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+};
+
+const releaseCloudLock = async (token) => {
+  if (!supabase || !token) return;
+  const { error } = await supabase.rpc('release_portal_state_lock', { p_token: token });
+  if (error) throw error;
+};
+
+const acquireCloudLock = async (token) => {
+  const deadline = Date.now() + 7000;
+  while (Date.now() < deadline) {
+    const { data, error } = await supabase.rpc('acquire_portal_state_lock', { p_token: token });
+    if (error) throw error;
+    if (data === true) return true;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+};
+
+const cloudStateMiddleware = async (req, res, next) => {
+  if (!supabase || !req.path.startsWith('/api/')) return next();
+
+  const lockToken = randomBytes(16).toString('hex');
+  const locked = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  try {
+    if (locked && !(await acquireCloudLock(lockToken))) {
+      return res.status(503).json({ message: 'The portal is busy saving changes. Please retry shortly.' });
+    }
+
+    const { data: stateRow, error } = await supabase
+      .from('portal_state')
+      .select('payload')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error) throw error;
+    if (!stateRow?.payload?.database || !stateRow?.payload?.curriculum) {
+      if (locked) await releaseCloudLock(lockToken);
+      return res.status(503).json({ message: 'Supabase is connected, but portal data has not been imported yet. Follow the Supabase setup steps in README.md.' });
+    }
+
+    const context = {
+      payload: stateRow.payload,
+      dirty: false,
+      lockToken: locked ? lockToken : null,
+      locked,
+    };
+    const sendJson = res.json.bind(res);
+    let responseStarted = false;
+    res.json = (body) => {
+      if (responseStarted) return res;
+      responseStarted = true;
+      const commitAndSend = async () => {
+        if (context.locked) {
+          if (context.dirty) {
+            const { data, error: saveError } = await supabase
+              .from('portal_state')
+              .update({ payload: context.payload, updated_at: new Date().toISOString() })
+              .eq('id', 1)
+              .eq('lock_token', context.lockToken)
+              .select('id')
+              .maybeSingle();
+            if (saveError) throw saveError;
+            if (!data) throw new Error('Portal state lock expired before changes were saved.');
+          }
+          await releaseCloudLock(context.lockToken);
+          context.locked = false;
+        }
+        sendJson(body);
+      };
+
+      commitAndSend().catch(async (saveError) => {
+        console.error('[api/state] Could not persist portal state:', saveError.message);
+        try {
+          await releaseCloudLock(context.lockToken);
+        } catch (releaseError) {
+          console.error('[api/state] Could not release portal state lock:', releaseError.message);
+        }
+        if (!res.headersSent) {
+          res.status(503);
+          sendJson({ message: 'The portal could not save this change. Please retry.' });
+        }
+      });
+      return res;
+    };
+
+    requestContext.run(context, next);
+  } catch (error) {
+    if (locked) {
+      try {
+        await releaseCloudLock(lockToken);
+      } catch (releaseError) {
+        console.error('[api/state] Could not release portal state lock:', releaseError.message);
+      }
+    }
+    console.error('[api/state] Could not load portal state:', error.message);
+    return res.status(503).json({ message: 'The portal database is unavailable. Check the Supabase configuration and setup.' });
+  }
 };
 
 const signToken = (user) =>
@@ -1077,15 +1195,17 @@ const requireRole = (...roles) => (req, res, next) => {
 };
 
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadsDir),
-    filename: (_req, file, cb) => {
-      const safe = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
-      const unique = `${Date.now()}-${safe}`;
-      cb(null, unique);
-    },
-  }),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  storage: supabase
+    ? multer.memoryStorage()
+    : multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, uploadsDir),
+      filename: (_req, file, cb) => {
+        const safe = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
+        const unique = `${Date.now()}-${safe}`;
+        cb(null, unique);
+      },
+    }),
+  limits: { fileSize: supabase ? 4 * 1024 * 1024 : 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowed = /\.(jpg|jpeg|png|webp|pdf|doc|docx)$/i;
     if (!allowed.test(file.originalname)) {
@@ -1099,18 +1219,19 @@ app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use('/uploads', express.static(uploadsDir));
+app.use(cloudStateMiddleware);
 
 // --- Health ---
 app.get('/api/health', (_req, res) => {
   try {
-    const database = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+    const database = getDb();
     const collections = Object.keys(database).length;
 
     res.json({
       status: 'ok',
       service: 'CIET Mechanical Engineering Department Portal API',
       version: '2.0.0',
-      database: { status: 'connected', collections },
+      database: { status: supabase ? 'connected' : 'local', collections },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -1996,6 +2117,8 @@ app.put('/api/sae', authMiddleware, requireRole('admin', 'staff'), (req, res) =>
 let curriculumCache = null;
 let curriculumCacheMtime = 0;
 const readCurriculum = () => {
+  const context = requestContext.getStore();
+  if (context) return context.payload.curriculum;
   try {
     const { mtimeMs } = fs.statSync(curriculumPath);
     if (curriculumCache && curriculumCacheMtime === mtimeMs) return curriculumCache;
@@ -2093,6 +2216,12 @@ app.get('/api/curriculum/course/:courseCode', (req, res) => {
 });
 
 const saveCurriculum = (curriculum) => {
+  const context = requestContext.getStore();
+  if (context) {
+    context.payload.curriculum = curriculum;
+    context.dirty = true;
+    return;
+  }
   fs.writeFileSync(curriculumPath, JSON.stringify(curriculum, null, 2));
   curriculumCache = curriculum;
   curriculumCacheMtime = fs.statSync(curriculumPath).mtimeMs;
@@ -2183,16 +2312,29 @@ app.delete('/api/admin/curriculum/courses/:courseCode', authMiddleware, requireR
   res.json({ message: 'Course removed from the published curriculum.' });
 });
 
-app.post('/api/admin/curriculum/pdf', authMiddleware, requireRole('admin'), upload.single('file'), (req, res) => {
+const storeUploadedFile = async (file) => {
+  if (!supabase) return `/uploads/${file.filename}`;
+
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '-');
+  const objectName = `${Date.now()}-${safeName}`;
+  const { data, error } = await supabase.storage
+    .from('portal-uploads')
+    .upload(objectName, file.buffer, { contentType: file.mimetype, upsert: false });
+  if (error) throw error;
+  return supabase.storage.from('portal-uploads').getPublicUrl(data.path).data.publicUrl;
+};
+
+app.post('/api/admin/curriculum/pdf', authMiddleware, requireRole('admin'), upload.single('file'), async (req, res) => {
   if (!req.file || req.file.mimetype !== 'application/pdf') {
-    if (req.file) fs.unlinkSync(req.file.path);
+    if (req.file?.path) fs.unlinkSync(req.file.path);
     return res.status(400).json({ message: 'Upload a PDF file for the official curriculum.' });
   }
   const curriculum = readCurriculum();
   if (!curriculum) return res.status(503).json({ message: 'Official curriculum data is not available.' });
+  const fileUrl = await storeUploadedFile(req.file);
   curriculum.pendingDocument = {
     fileName: req.file.originalname,
-    fileUrl: `/uploads/${req.file.filename}`,
+    fileUrl,
     uploadedAt: new Date().toISOString(),
     pageCount: curriculum.sourceDocument?.pageCount || null,
   };
@@ -2213,12 +2355,12 @@ app.put('/api/department', authMiddleware, requireRole('admin'), (req, res) => {
 });
 
 // --- Universal File Upload ---
-app.post('/api/upload', authMiddleware, upload.single('file'), (req, res) => {
+app.post('/api/upload', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file received for upload.' });
   }
 
-  const fileUrl = `/uploads/${req.file.filename}`;
+  const fileUrl = await storeUploadedFile(req.file);
   res.status(201).json({
     message: 'File uploaded successfully.',
     file: {
@@ -2247,6 +2389,10 @@ app.use((error, _req, res, _next) => {
   return res.status(500).json({ message: 'Internal server error.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`CIET Mechanical Engineering Department API running on http://localhost:${PORT}`);
-});
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`CIET Mechanical Engineering Department API running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
