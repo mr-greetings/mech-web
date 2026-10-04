@@ -48,12 +48,11 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
     console.warn('Generated a local development JWT secret in .dev-jwt-secret. Set JWT_SECRET explicitly for production.');
   }
 }
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is required. Set it in the server environment before starting the API.');
-}
-if (isProduction && !supabase) {
-  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in production.');
-}
+const missingServerEnvironment = [
+  ['JWT_SECRET', JWT_SECRET],
+  ['SUPABASE_URL', supabaseUrl],
+  ['SUPABASE_SERVICE_ROLE_KEY', supabaseServiceKey],
+].filter(([, value]) => !value?.trim()).map(([name]) => name);
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
@@ -957,7 +956,7 @@ const ensureSeedData = () => {
 };
 
 // Initialize DB
-let db = supabase ? null : ensureSeedData();
+let db = supabase || isVercel ? null : ensureSeedData();
 
 const getDb = () => {
   const context = requestContext.getStore();
@@ -1235,11 +1234,29 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.use('/api', (req, res, next) => {
+  if (!isProduction || missingServerEnvironment.length === 0 || req.path === '/health') {
+    return next();
+  }
+  return res.status(503).json({
+    message: 'The production API is missing required server environment variables.',
+    missingEnvironmentVariables: missingServerEnvironment,
+  });
+});
 if (!isVercel) app.use('/uploads', express.static(uploadsDir));
 app.use(cloudStateMiddleware);
 
 // --- Health ---
 app.get('/api/health', (_req, res) => {
+  if (missingServerEnvironment.length > 0) {
+    return res.status(503).json({
+      status: 'error',
+      service: 'CIET Mechanical Engineering Department Portal API',
+      version: '2.0.0',
+      database: { status: 'unavailable' },
+      missingEnvironmentVariables: missingServerEnvironment,
+    });
+  }
   try {
     const database = getDb();
     const collections = Object.keys(database).length;
