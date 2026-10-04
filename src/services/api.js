@@ -1,16 +1,10 @@
-const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
-const isLocalHost = ['localhost', '127.0.0.1'].includes(globalThis.location?.hostname);
-const API_BASE = (configuredApiBase || (import.meta.env.DEV || isLocalHost ? '/api' : '')).replace(/\/+$/, '');
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 
 export const getStoredToken = () => localStorage.getItem('ciet_mech_token');
 export const setStoredToken = (token) => localStorage.getItem('ciet_mech_token') !== token && localStorage.setItem('ciet_mech_token', token);
 export const removeStoredToken = () => localStorage.removeItem('ciet_mech_token');
 
 const request = async (endpoint, options = {}) => {
-  if (!API_BASE) {
-    throw new Error('The API server is not configured. Set VITE_API_BASE_URL to your deployed backend URL ending in /api, then rebuild the frontend.');
-  }
-
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
@@ -33,7 +27,7 @@ const request = async (endpoint, options = {}) => {
       headers,
     });
   } catch {
-    throw new Error('Unable to reach the API server. Check that the Render service is running and FRONTEND_ORIGINS allows this website.');
+    throw new Error('Unable to reach the same-deployment API. Verify that the Vercel API function is deployed at /api.');
   }
 
   const contentType = res.headers.get('content-type') || '';
@@ -41,7 +35,7 @@ const request = async (endpoint, options = {}) => {
   if (!contentType.includes('application/json')) {
     data = await res.text();
     if (/<\s*html[\s>]/i.test(data) || contentType.includes('text/html')) {
-      throw new Error('The API URL returned a website page instead of API data. Set VITE_API_BASE_URL to the Render backend URL ending in /api.');
+      throw new Error('The API route returned the website instead of JSON. Verify that the Vercel API function handles /api/* requests.');
     }
   } else {
     data = await res.json();
@@ -51,11 +45,11 @@ const request = async (endpoint, options = {}) => {
     const isCloudNotFound = typeof data === 'string' && /^\s*cloud not found\.?\s*$/i.test(data);
     const errorMsg = data?.message || (
       isCloudNotFound
-        ? 'The configured host could not find the API. Set VITE_API_BASE_URL to the deployed Express API URL, including /api, and verify that the API is running.'
+        ? 'The deployed host could not find the API route. Verify that the Vercel API function handles /api/* requests.'
         : typeof data === 'string' && !/<\s*html[\s>]/i.test(data)
         ? data
         : res.status === 404
-          ? 'API endpoint not found. Check VITE_API_BASE_URL and confirm it includes /api.'
+          ? 'API endpoint not found. Verify the Vercel deployment includes the /api function.'
           : `Request failed with status ${res.status}`
     );
     throw new Error(errorMsg);

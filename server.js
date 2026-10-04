@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 const isProduction = process.env.NODE_ENV === 'production';
+const isVercel = process.env.VERCEL === '1';
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = supabaseUrl && supabaseServiceKey
@@ -53,20 +54,19 @@ if (!JWT_SECRET) {
 if (isProduction && !supabase) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in production.');
 }
-if (isProduction && frontendOrigins.size === 0) {
-  throw new Error('FRONTEND_ORIGINS must include the deployed frontend origin in production.');
-}
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
 const curriculumPath = path.join(dbDir, 'r2023-curriculum.json');
 
-fs.mkdirSync(dbDir, { recursive: true });
-fs.mkdirSync(uploadsDir, { recursive: true });
+if (!isVercel) {
+  fs.mkdirSync(dbDir, { recursive: true });
+  fs.mkdirSync(uploadsDir, { recursive: true });
 
-const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
-if (!fs.existsSync(sampleBrochurePath)) {
-  fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
+  const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
+  if (!fs.existsSync(sampleBrochurePath)) {
+    fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
+  }
 }
 
 const buildInitialDatabase = () => {
@@ -1235,7 +1235,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
-app.use('/uploads', express.static(uploadsDir));
+if (!isVercel) app.use('/uploads', express.static(uploadsDir));
 app.use(cloudStateMiddleware);
 
 // --- Health ---
@@ -2406,8 +2406,10 @@ app.use((error, _req, res, _next) => {
   return res.status(500).json({ message: 'Internal server error.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`CIET Mechanical Engineering Department API running on port ${PORT}`);
-});
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`CIET Mechanical Engineering Department API running on port ${PORT}`);
+  });
+}
 
 export default app;

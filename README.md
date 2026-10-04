@@ -1,6 +1,6 @@
 # CIET Mechanical Engineering Portal
 
-The portal uses React/Vite on Vercel, Express on Render, and Supabase PostgreSQL/Storage for production persistence. Local development can continue to use the JSON files under `data/`.
+The portal uses React/Vite and the existing Express API in one Vercel project, with Supabase PostgreSQL/Storage for production persistence. Local development can continue to use the JSON files under `data/`.
 
 ## Run locally
 
@@ -15,49 +15,31 @@ npm run dev
 ```
 
 Vite runs on `http://localhost:5173` and proxies `/api` and `/uploads` to Express on `http://localhost:4000`.
-In production, Vercel hosts only the frontend. `VITE_API_BASE_URL` points to the
-Render Express service and includes `/api`. Registration/login use the existing
-Express bcrypt/JWT authentication backed by the Supabase `portal_state` JSONB
-row; this project does not use Supabase Auth or MySQL. Uploaded files use the
-`portal-uploads` Supabase Storage bucket. Local mode continues to use `data/`
-and `uploads/`.
+In production, Vercel serves the Vite build and routes `/api/*` to the Express
+function in `api/[...route].js`. The frontend calls same-origin `/api` by
+default; `VITE_API_BASE_URL` is optional. Login/register use the existing
+Express bcrypt/JWT authentication backed by Supabase `portal_state` JSONB; the
+app does not use Supabase Auth or MySQL. Uploaded files use the
+`portal-uploads` Supabase Storage bucket.
 
-## Deploy Frontend and API
+## Deploy to Vercel
 
-### Render Backend
+Keep the project root at `.`. `vercel.json` configures the Express catch-all
+function, bundles `data/*.json`, publishes the Vite `dist` output, and leaves
+`/api/*` paths out of the SPA rewrite. The API function imports the existing
+`server.js`; it does not create a second auth implementation.
 
-Create a Render Web Service from this repository with root directory `.`.
-`render.yaml` defines the service, or configure it manually with:
+Required Vercel server environment variables:
 
-- Build command: `npm ci`
-- Start command: `npm start`
-- Health check path: `/api/health`
-
-Set these Render environment variables:
-
-- `NODE_ENV=production`
-- `JWT_SECRET`: a long random secret; keep it stable to preserve active sessions
+- `JWT_SECRET`: a long random secret, stable across deployments
 - `SUPABASE_URL`: the Supabase project URL
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only Supabase service-role/secret key
-- `FRONTEND_ORIGINS`: exact Vercel production URL and any custom domain, comma-separated
 
-Render provides `PORT` automatically. Do not set the Supabase service-role key
-with a `VITE_` prefix and never place it in frontend variables.
-
-### Vercel Frontend
-
-Keep the Vercel project root at `.` and build command `npm run build`; output is
-`dist`. Set:
-
-- `VITE_API_BASE_URL=https://<render-service>.onrender.com/api`
-- `VITE_SUPABASE_URL`: the project URL only if browser code imports
-  `src/services/supabase.js`
-- `VITE_SUPABASE_ANON_KEY`: the public anon/publishable key only if browser code
-  imports `src/services/supabase.js`
-
-The application login/register flow uses the Express API, not Supabase Auth.
-Rebuild/redeploy Vercel after changing `VITE_API_BASE_URL` because Vite embeds
-this value into the frontend bundle.
+`VITE_API_BASE_URL` is not required for the same-origin setup; the client
+defaults to `/api`. If explicitly set, use `/api`. Optional browser Supabase
+variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) are only needed if
+frontend code imports `src/services/supabase.js`; never expose the service-role
+key with a `VITE_` prefix.
 
 ### Supabase Setup
 
@@ -71,9 +53,9 @@ this value into the frontend bundle.
 3. Run `npm run migrate:supabase` once. It imports `data/db.json` and
    `data/r2023-curriculum.json`, refuses to overwrite existing cloud data, and
    rotates any known seeded default passwords.
-4. Verify `https://<render-service>.onrender.com/api/health` returns
-   `status: ok` and `database.status: connected`. Then test register/login from
-   the deployed Vercel site.
+4. Redeploy Vercel, then verify `https://<your-domain>/api/health` returns
+   `status: ok` and `database.status: connected`. Test register/login from the
+   same Vercel domain.
 
 Cloud uploads are limited to 4 MB to stay below serverless/proxy request limits.
 The local development server retains its 10 MB limit.
