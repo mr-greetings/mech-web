@@ -997,7 +997,7 @@ const acquireCloudLock = async (token) => {
 };
 
 const cloudStateMiddleware = async (req, res, next) => {
-  if (!supabase || !req.path.startsWith('/api/')) return next();
+  if (!supabase || !req.path.startsWith('/api/') || req.path === '/api/health') return next();
 
   const lockToken = randomBytes(16).toString('hex');
   const locked = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
@@ -1247,7 +1247,7 @@ if (!isVercel) app.use('/uploads', express.static(uploadsDir));
 app.use(cloudStateMiddleware);
 
 // --- Health ---
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
   if (missingServerEnvironment.length > 0) {
     return res.status(503).json({
       status: 'error',
@@ -1257,6 +1257,43 @@ app.get('/api/health', (_req, res) => {
       missingEnvironmentVariables: missingServerEnvironment,
     });
   }
+
+  if (supabase) {
+    try {
+      const { data: stateRow, error } = await supabase
+        .from('portal_state')
+        .select('payload')
+        .eq('id', 1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!stateRow?.payload?.database || !stateRow?.payload?.curriculum) {
+        return res.status(503).json({
+          status: 'error',
+          service: 'CIET Mechanical Engineering Department Portal API',
+          version: '2.0.0',
+          database: { status: 'connected', initialized: false },
+          message: 'Supabase is reachable, but portal data has not been imported. Run npm run migrate:supabase.',
+        });
+      }
+      return res.json({
+        status: 'ok',
+        service: 'CIET Mechanical Engineering Department Portal API',
+        version: '2.0.0',
+        database: { status: 'connected', collections: Object.keys(stateRow.payload.database).length },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('[api/health] Supabase portal_state check failed:', error.message);
+      return res.status(503).json({
+        status: 'error',
+        service: 'CIET Mechanical Engineering Department Portal API',
+        version: '2.0.0',
+        database: { status: 'unavailable', errorCode: error.code || null },
+        message: 'Supabase portal_state is unavailable. Verify the SQL migration and server-side Supabase credentials.',
+      });
+    }
+  }
+
   try {
     const database = getDb();
     const collections = Object.keys(database).length;
