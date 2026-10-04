@@ -2,7 +2,7 @@
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
     "functions": {
-        "api/[...route].js": {
+        "api/**/*.js": {
             "maxDuration": 30,
             "includeFiles": "data/*.json"
         }

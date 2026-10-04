@@ -24,10 +24,12 @@ app does not use Supabase Auth or MySQL. Uploaded files use the
 
 ## Deploy to Vercel
 
-Keep the project root at `.`. `vercel.json` configures the Express catch-all
-function, bundles `data/*.json`, publishes the Vite `dist` output, and leaves
-`/api/*` paths out of the SPA rewrite. The API function imports the existing
-`server.js`; it does not create a second auth implementation.
+Keep the project root at `.`. `vercel.json` bundles `api/**/*.js`, publishes
+the Vite `dist` output, and leaves `/api/*` paths out of the SPA rewrite.
+`api/auth/login.js`, `api/auth/register.js`, `api/auth/me.js`, and
+`api/health.js` all export the existing Express app from `server.js`; the
+catch-all function handles the rest of `/api/*`. There is no duplicate auth
+implementation.
 
 Required Vercel server environment variables:
 
