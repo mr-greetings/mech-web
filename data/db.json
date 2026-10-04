@@ -100,6 +100,32 @@
       "staffId": "",
       "registerNumber": "71052405010",
       "createdAt": "2026-10-01T09:07:21.000Z"
+    },
+    {
+      "id": "user-1790931187962",
+      "name": "madhan",
+      "email": "madhanrocks797@gmail.com",
+      "passwordHash": "$2b$10$Zw/XdO8XQh1sKkaStMMCX.coNPU6ksxuOsGzi9VyKGp.8qEchI1ma",
+      "role": "student",
+      "phone": "8438812938",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1790931188729",
+      "staffId": "",
+      "registerNumber": "25BITL01",
+      "createdAt": "2026-10-02T08:53:08.732Z"
+    },
+    {
+      "id": "user-1791126470427",
+      "name": "madhan",
+      "email": "madhanrocks644@gmail.com",
+      "passwordHash": "$2b$10$pLKOUt3XQbiHJJeVx02VJOyFekawqRb7ZjW3M8H.LylsA5zSUCcDq",
+      "role": "student",
+      "phone": "1234567890",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1791126471387",
+      "staffId": "",
+      "registerNumber": "123456789",
+      "createdAt": "2026-10-04T15:07:51.387Z"
     }
   ],
   "batches": [],
@@ -138,6 +164,62 @@
           "createdAt": "2026-10-01T09:25:46.288Z"
         }
       ],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1790931188729",
+      "userId": "user-1790931187962",
+      "name": "madhan",
+      "registerNumber": "25BITL01",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "madhanrocks797@gmail.com",
+      "phone": "8438812938",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1791126471387",
+      "userId": "user-1791126470427",
+      "name": "madhan",
+      "registerNumber": "123456789",
+      "batch": "2024 — 2028",
+      "academicYear": "2024—2028",
+      "section": "A",
+      "yearOfStudy": "III Year",
+      "email": "madhanrocks644@gmail.com",
+      "phone": "1234567890",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
       "eventsParticipated": [],
       "galleryImages": [],
       "socialLinks": {

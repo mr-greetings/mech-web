@@ -10,6 +10,7 @@ import {
   Trash2,
   ExternalLink,
   Download,
+  Eye,
   Share2,
   CheckCircle,
   ArrowUpRight,
@@ -59,6 +60,7 @@ export const StudentDashboard = ({ onNavigate }) => {
   const [certDate, setCertDate] = useState('');
   const [certDesc, setCertDesc] = useState('');
   const [certFile, setCertFile] = useState(null);
+  const [certificatePreview, setCertificatePreview] = useState(null);
 
   // New Achievement
   const [achievementInput, setAchievementInput] = useState('');
@@ -100,6 +102,10 @@ export const StudentDashboard = ({ onNavigate }) => {
   useEffect(() => {
     fetchStudentData();
   }, [user]);
+
+  useEffect(() => () => {
+    if (certificatePreview?.temporary) URL.revokeObjectURL(certificatePreview.url);
+  }, [certificatePreview]);
 
   useEffect(() => {
     if (!user || !isStudent) {
@@ -233,6 +239,7 @@ export const StudentDashboard = ({ onNavigate }) => {
         studentName: student.name,
         category: 'Students',
         fileUrl,
+        fileType: certFile?.type || '',
       };
 
       await api.createCertificate(certPayload);
@@ -682,6 +689,20 @@ export const StudentDashboard = ({ onNavigate }) => {
                   {cert.description && <p className="cert-desc">{cert.description}</p>}
                   <div className="cert-card-bottom-actions">
                     {cert.fileUrl && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-xs"
+                        onClick={() => setCertificatePreview({
+                          url: cert.fileUrl,
+                          type: cert.fileType || (cert.fileUrl.toLowerCase().split('?')[0].endsWith('.pdf') ? 'application/pdf' : 'image/*'),
+                          title: cert.title,
+                        })}
+                      >
+                        <Eye size={13} />
+                        <span>Preview</span>
+                      </button>
+                    )}
+                    {cert.fileUrl && (
                       <a
                         href={cert.fileUrl}
                         download
@@ -761,8 +782,26 @@ export const StudentDashboard = ({ onNavigate }) => {
                     <input
                       type="file"
                       accept=".pdf,image/*"
-                      onChange={(e) => setCertFile(e.target.files[0])}
+                      onChange={(e) => setCertFile(e.target.files?.[0] || null)}
                     />
+                    {certFile && (
+                      <div className="certificate-file-selection">
+                        <span>{certFile.name}</span>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-xs"
+                          onClick={() => setCertificatePreview({
+                            url: URL.createObjectURL(certFile),
+                            type: certFile.type,
+                            title: certTitle || certFile.name,
+                            temporary: true,
+                          })}
+                        >
+                          <Eye size={13} />
+                          <span>Preview file</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
@@ -770,6 +809,39 @@ export const StudentDashboard = ({ onNavigate }) => {
                   </button>
                 </form>
               </div>
+            </div>
+          )}
+
+          {certificatePreview && (
+            <div className="modal-backdrop certificate-preview-backdrop" onClick={() => setCertificatePreview(null)}>
+              <section
+                className="modal-window certificate-preview-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Certificate preview: ${certificatePreview.title}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setCertificatePreview(null)}
+                  aria-label="Close certificate preview"
+                >
+                  <X size={20} />
+                </button>
+                <h3>{certificatePreview.title}</h3>
+                <div className="certificate-preview-content">
+                  {certificatePreview.type === 'application/pdf' ? (
+                    <iframe title={`Preview of ${certificatePreview.title}`} src={certificatePreview.url} />
+                  ) : (
+                    <img src={certificatePreview.url} alt={`Preview of ${certificatePreview.title}`} />
+                  )}
+                </div>
+                <a href={certificatePreview.url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
+                  <ExternalLink size={14} />
+                  <span>Open original</span>
+                </a>
+              </section>
             </div>
           )}
         </section>
