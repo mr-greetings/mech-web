@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite --host 0.0.0.0\"",
-    "build": "vite build",
+    "build": "node scripts/validate-deploy-env.js && vite build",
     "postbuild": "node scripts/copy-upload-assets.js",
     "preview": "concurrently \"node server.js\" \"vite preview --host 0.0.0.0\"",
     "start": "node server.js",
