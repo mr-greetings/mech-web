@@ -1,10 +1,16 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+const isLocalHost = ['localhost', '127.0.0.1'].includes(globalThis.location?.hostname);
+const API_BASE = (configuredApiBase || (import.meta.env.DEV || isLocalHost ? '/api' : '')).replace(/\/+$/, '');
 
 export const getStoredToken = () => localStorage.getItem('ciet_mech_token');
 export const setStoredToken = (token) => localStorage.getItem('ciet_mech_token') !== token && localStorage.setItem('ciet_mech_token', token);
 export const removeStoredToken = () => localStorage.removeItem('ciet_mech_token');
 
 const request = async (endpoint, options = {}) => {
+  if (!API_BASE) {
+    throw new Error('The API server is not configured. Set VITE_API_BASE_URL to your deployed backend URL ending in /api, then rebuild the frontend.');
+  }
+
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
@@ -27,7 +33,7 @@ const request = async (endpoint, options = {}) => {
       headers,
     });
   } catch {
-    throw new Error('Unable to reach the API server. Check that it is running and that VITE_API_BASE_URL is configured for this deployment.');
+    throw new Error('Unable to reach the API server. Check that the Render service is running and FRONTEND_ORIGINS allows this website.');
   }
 
   const contentType = res.headers.get('content-type') || '';
@@ -35,7 +41,7 @@ const request = async (endpoint, options = {}) => {
   if (!contentType.includes('application/json')) {
     data = await res.text();
     if (/<\s*html[\s>]/i.test(data) || contentType.includes('text/html')) {
-      throw new Error('The API URL returned the website instead of API data. Check the Vercel API function deployment and routing.');
+      throw new Error('The API URL returned a website page instead of API data. Set VITE_API_BASE_URL to the Render backend URL ending in /api.');
     }
   } else {
     data = await res.json();

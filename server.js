@@ -17,12 +17,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
-const isVercel = process.env.VERCEL === '1';
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const isProduction = process.env.NODE_ENV === 'production';
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
   : null;
+const frontendOrigins = new Set(
+  (process.env.FRONTEND_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+);
 const requestContext = new AsyncLocalStorage();
 let JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
@@ -44,22 +50,23 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is required. Set it in the server environment before starting the API.');
 }
-if (isVercel && !supabase) {
-  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for the Vercel API.');
+if (isProduction && !supabase) {
+  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in production.');
+}
+if (isProduction && frontendOrigins.size === 0) {
+  throw new Error('FRONTEND_ORIGINS must include the deployed frontend origin in production.');
 }
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
 const curriculumPath = path.join(dbDir, 'r2023-curriculum.json');
 
-if (!isVercel) {
-  fs.mkdirSync(dbDir, { recursive: true });
-  fs.mkdirSync(uploadsDir, { recursive: true });
+fs.mkdirSync(dbDir, { recursive: true });
+fs.mkdirSync(uploadsDir, { recursive: true });
 
-  const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
-  if (!fs.existsSync(sampleBrochurePath)) {
-    fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
-  }
+const sampleBrochurePath = path.join(uploadsDir, 'sample-brochure.pdf');
+if (!fs.existsSync(sampleBrochurePath)) {
+  fs.writeFileSync(sampleBrochurePath, '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF');
 }
 
 const buildInitialDatabase = () => {
@@ -1215,7 +1222,17 @@ const upload = multer({
   },
 });
 
-app.use(cors());
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || frontendOrigins.has(origin) || (!isProduction && frontendOrigins.size === 0)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400,
+}));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use('/uploads', express.static(uploadsDir));
@@ -2389,10 +2406,8 @@ app.use((error, _req, res, _next) => {
   return res.status(500).json({ message: 'Internal server error.' });
 });
 
-if (!isVercel) {
-  app.listen(PORT, () => {
-    console.log(`CIET Mechanical Engineering Department API running on http://localhost:${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`CIET Mechanical Engineering Department API running on port ${PORT}`);
+});
 
 export default app;

@@ -1,6 +1,6 @@
 # CIET Mechanical Engineering Portal
 
-The portal uses React/Vite on the frontend, Express for the API, and Supabase PostgreSQL/Storage for Vercel persistence. Local development can continue to use the JSON files under `data/`.
+The portal uses React/Vite on Vercel, Express on Render, and Supabase PostgreSQL/Storage for production persistence. Local development can continue to use the JSON files under `data/`.
 
 ## Run locally
 
@@ -15,34 +15,68 @@ npm run dev
 ```
 
 Vite runs on `http://localhost:5173` and proxies `/api` and `/uploads` to Express on `http://localhost:4000`.
-Vercel serves the Vite build and the Express API from the same project; `/api/*`
-is handled by `api/[...route].js`, and `/uploads/*` static files are copied into
-the build output. Registration, login, admin edits, and curriculum edits use
-the Supabase `portal_state` row in production. Uploaded files use the public
+In production, Vercel hosts only the frontend. `VITE_API_BASE_URL` points to the
+Render Express service and includes `/api`. Registration/login use the existing
+Express bcrypt/JWT authentication backed by the Supabase `portal_state` JSONB
+row; this project does not use Supabase Auth or MySQL. Uploaded files use the
 `portal-uploads` Supabase Storage bucket. Local mode continues to use `data/`
 and `uploads/`.
 
-## Deploy to Vercel with Supabase
+## Deploy Frontend and API
+
+### Render Backend
+
+Create a Render Web Service from this repository with root directory `.`.
+`render.yaml` defines the service, or configure it manually with:
+
+- Build command: `npm ci`
+- Start command: `npm start`
+- Health check path: `/api/health`
+
+Set these Render environment variables:
+
+- `NODE_ENV=production`
+- `JWT_SECRET`: a long random secret; keep it stable to preserve active sessions
+- `SUPABASE_URL`: the Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only Supabase service-role/secret key
+- `FRONTEND_ORIGINS`: exact Vercel production URL and any custom domain, comma-separated
+
+Render provides `PORT` automatically. Do not set the Supabase service-role key
+with a `VITE_` prefix and never place it in frontend variables.
+
+### Vercel Frontend
+
+Keep the Vercel project root at `.` and build command `npm run build`; output is
+`dist`. Set:
+
+- `VITE_API_BASE_URL=https://<render-service>.onrender.com/api`
+- `VITE_SUPABASE_URL`: the project URL only if browser code imports
+  `src/services/supabase.js`
+- `VITE_SUPABASE_ANON_KEY`: the public anon/publishable key only if browser code
+  imports `src/services/supabase.js`
+
+The application login/register flow uses the Express API, not Supabase Auth.
+Rebuild/redeploy Vercel after changing `VITE_API_BASE_URL` because Vite embeds
+this value into the frontend bundle.
+
+### Supabase Setup
 
 1. In the Supabase SQL Editor, run `supabase/migrations/20261001000000_portal_state.sql`.
-2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and a long random `JWT_SECRET`
-	in the Vercel project's server environment variables. The service-role key
-	must never use a `VITE_` prefix or be exposed to browser code.
-3. Locally, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`. Set
-	unique `INITIAL_ADMIN_PASSWORD`, `INITIAL_STAFF_PASSWORD`, and
-	`INITIAL_STUDENT_PASSWORD` values there if their seeded accounts still use
-	their defaults, then run `npm run migrate:supabase` once to import
-	`data/db.json` and `data/r2023-curriculum.json`. The importer refuses to
-	overwrite existing data and rotates the known default account passwords.
-4. Redeploy the Vercel project. The frontend uses the same-origin `/api` by
-	default, so `VITE_API_BASE_URL` is not needed for this setup.
-5. Verify `https://<your-domain>/api/health` reports `status: ok` and
-	`database.status: connected` before testing registration.
+   It creates the protected `portal_state` JSONB row, write-lock RPCs, and the
+   `portal-uploads` storage bucket; no separate auth tables are needed.
+2. Locally, set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in ignored `.env`.
+   If seeded passwords are still unchanged, set unique 12+ character
+   `INITIAL_ADMIN_PASSWORD`, `INITIAL_STAFF_PASSWORD`, and
+   `INITIAL_STUDENT_PASSWORD` values there.
+3. Run `npm run migrate:supabase` once. It imports `data/db.json` and
+   `data/r2023-curriculum.json`, refuses to overwrite existing cloud data, and
+   rotates any known seeded default passwords.
+4. Verify `https://<render-service>.onrender.com/api/health` returns
+   `status: ok` and `database.status: connected`. Then test register/login from
+   the deployed Vercel site.
 
-Vercel requests are limited to 4.5 MB, so cloud uploads are capped at 4 MB.
+Cloud uploads are limited to 4 MB to stay below serverless/proxy request limits.
 The local development server retains its 10 MB limit.
-`VITE_API_BASE_URL` is only needed when hosting the frontend and API on different
-origins, and must point to the API origin including `/api`.
 
 ## Official R2023 Curriculum
 

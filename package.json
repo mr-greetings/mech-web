@@ -8,6 +8,7 @@
     "build": "vite build",
     "postbuild": "node scripts/copy-upload-assets.js",
     "preview": "concurrently \"node server.js\" \"vite preview --host 0.0.0.0\"",
+    "start": "node server.js",
     "server": "node server.js",
     "migrate:supabase": "node scripts/migrate-supabase.js"
   },
