@@ -623,7 +623,7 @@ const buildInitialDatabase = () => {
         title: 'Additive Manufacturing & Rapid Prototyping Showcase',
         category: 'Seminars',
         image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=85',
-        caption: 'Display of carbon-reinforced composite parts printed by student teams.',
+        caption: 'Display of carbon-reinforced composite parts printed by students teams.',
       },
     ],
     certificates: [
