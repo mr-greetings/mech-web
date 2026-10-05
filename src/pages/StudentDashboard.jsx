@@ -565,6 +565,30 @@ export const StudentDashboard = ({ onNavigate }) => {
                     </div>
                   )}
                   <div className="project-links-row">
+                    {proj.github && (
+                      <a
+                        href={proj.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline btn-sm"
+                        title="Open project repository"
+                      >
+                        <ExternalLink size={14} />
+                        <span>Code Repo</span>
+                      </a>
+                    )}
+                    {proj.liveDemo && (
+                      <a
+                        href={proj.liveDemo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary btn-sm"
+                        title="Open live demo or report"
+                      >
+                        <ExternalLink size={14} />
+                        <span>Demo / Report</span>
+                      </a>
+                    )}
                     <button
                       className="btn-danger-icon"
                       onClick={() => handleDeleteProject(proj.id)}
