@@ -31,7 +31,7 @@ export const AuthModal = ({ onClose, onSuccessRedirect }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [registerNumber, setRegisterNumber] = useState('');
-  const [batch, setBatch] = useState('2024 — 2028');
+  const [batch] = useState('2024 — 2028');
   const [section, setSection] = useState('A');
   const [yearOfStudy, setYearOfStudy] = useState('III Year');
   const [designation, setDesignation] = useState('Assistant Professor');
@@ -42,8 +42,6 @@ export const AuthModal = ({ onClose, onSuccessRedirect }) => {
   const [resetEmail, setResetEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
-
-  const batchesList = ['2023 — 2027', '2024 — 2028', '2025 — 2029', '2026 — 2030'];
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -317,13 +315,7 @@ export const AuthModal = ({ onClose, onSuccessRedirect }) => {
 
                   <div className="form-group">
                     <label>Academic Batch</label>
-                    <select value={batch} onChange={(e) => setBatch(e.target.value)}>
-                      {batchesList.map((b) => (
-                        <option key={b} value={b}>
-                          {b}
-                        </option>
-                      ))}
-                    </select>
+                    <input type="text" value={batch} disabled readOnly />
                   </div>
                 </div>
 

@@ -391,53 +391,11 @@ export const AdminDashboard = ({ onNavigate }) => {
         <section className="page-width dashboard-content-section">
           <div className="section-head-with-action">
             <div>
-              <h2>Year-Wise Academic Batches</h2>
-              <p>Add new batches seamlessly without changing code. Students will automatically map into these batches.</p>
+              <h2>Academic Batch</h2>
+              <p>The portal is configured to operate with a single approved batch only: 2024 — 2028.</p>
             </div>
           </div>
 
-          {/* Add Batch Form */}
-          <div className="dashboard-card-form" style={{ marginTop: '16px' }}>
-            <h4>Add New Batch</h4>
-            <form onSubmit={handleAddBatch} className="auth-form" style={{ marginTop: '12px' }}>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Batch Display Label</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 2027 — 2031"
-                    value={newBatchLabel}
-                    onChange={(e) => setNewBatchLabel(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Academic Year Code</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 2027-2031"
-                    value={newBatchYear}
-                    onChange={(e) => setNewBatchYear(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Description (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Incoming First Year Batch"
-                    value={newBatchDesc}
-                    onChange={(e) => setNewBatchDesc(e.target.value)}
-                  />
-                </div>
-              </div>
-              <button type="submit" className="btn btn-primary btn-sm">
-                <span>Add Batch to Database</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Batches Table */}
           <div className="dashboard-table-container" style={{ marginTop: '20px' }}>
             <table className="modern-table">
               <thead>
@@ -446,7 +404,6 @@ export const AdminDashboard = ({ onNavigate }) => {
                   <th>Academic Code</th>
                   <th>Description</th>
                   <th>Enrolled Students</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -458,15 +415,6 @@ export const AdminDashboard = ({ onNavigate }) => {
                       <td><span className="mono-badge">{b.academicYear}</span></td>
                       <td>{b.description || 'Active Undergraduate Batch'}</td>
                       <td><span className="metrics-pill">{count} Enrolled</span></td>
-                      <td>
-                        <button
-                          className="btn-danger-icon"
-                          onClick={() => handleDeleteBatch(b.id)}
-                          title="Delete Batch"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}

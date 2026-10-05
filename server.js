@@ -139,10 +139,7 @@ const buildInitialDatabase = () => {
       },
     ],
     batches: [
-      { id: '2023-2027', label: '2023 — 2027', academicYear: '2023-2027', active: true, description: 'Final Year Batch' },
-      { id: '2024-2028', label: '2024 — 2028', academicYear: '2024-2028', active: true, description: 'Third Year Batch' },
-      { id: '2025-2029', label: '2025 — 2029', academicYear: '2025-2029', active: true, description: 'Second Year Batch' },
-      { id: '2026-2030', label: '2026 — 2030', academicYear: '2026-2030', active: true, description: 'First Year Batch' },
+      { id: '2024-2028', label: '2024 — 2028', academicYear: '2024-2028', active: true, description: 'Current Batch' },
     ],
     staff: [
       {
@@ -1471,15 +1468,16 @@ app.post('/api/auth/register', (req, res) => {
 
     if (role === 'student') {
       studentId = `student-${Date.now()}`;
+      const fixedBatch = '2024 — 2028';
       data.students.push({
         id: studentId,
         userId,
         name,
         registerNumber,
-        batch: input.batch || '2025 — 2029',
-        academicYear: input.academicYear || '2025-2029',
+        batch: fixedBatch,
+        academicYear: '2024-2028',
         section: input.section || 'A',
-        yearOfStudy: input.yearOfStudy || 'II Year',
+        yearOfStudy: input.yearOfStudy || 'III Year',
         email,
         phone: typeof input.phone === 'string' ? input.phone.trim() : '',
         profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
@@ -1734,7 +1732,9 @@ app.post('/api/auth/reset', (req, res) => {
 // --- Batches Management ---
 app.get('/api/batches', (_req, res) => {
   const data = getDb();
-  res.json(data.batches || []);
+  const allowedBatch = { id: '2024-2028', label: '2024 — 2028', academicYear: '2024-2028', active: true, description: 'Current Batch' };
+  const batches = (data.batches || []).filter((batch) => batch.id === '2024-2028' || batch.label === '2024 — 2028' || batch.academicYear === '2024-2028');
+  res.json(batches.length ? batches : [allowedBatch]);
 });
 
 app.post('/api/batches', authMiddleware, requireRole('admin'), (req, res) => {
@@ -1742,38 +1742,37 @@ app.post('/api/batches', authMiddleware, requireRole('admin'), (req, res) => {
   const data = getDb();
   const batchId = id || academicYear || `batch-${Date.now()}`;
 
-  if (data.batches.some((b) => b.id === batchId)) {
-    return res.status(409).json({ message: 'A batch with this ID already exists.' });
+  const normalizedBatch = {
+    id: '2024-2028',
+    label: '2024 — 2028',
+    academicYear: '2024-2028',
+    description: 'Current Batch',
+    active: true,
+  };
+
+  if (data.batches.some((b) => b.id === normalizedBatch.id)) {
+    return res.status(409).json({ message: 'The 2024 — 2028 batch already exists.' });
   }
 
-  const newBatch = {
-    id: batchId,
-    label: label || batchId,
-    academicYear: academicYear || batchId,
-    description,
-    active,
-  };
-  data.batches.push(newBatch);
+  data.batches = [normalizedBatch];
   saveDb(data);
-  res.status(201).json({ message: 'New batch added successfully.', batch: newBatch });
+  res.status(201).json({ message: 'Batch set to 2024 — 2028.', batch: normalizedBatch });
 });
 
 app.put('/api/batches/:id', authMiddleware, requireRole('admin'), (req, res) => {
   const data = getDb();
-  const index = data.batches.findIndex((b) => b.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ message: 'Batch not found.' });
-  }
-  data.batches[index] = { ...data.batches[index], ...req.body, id: req.params.id };
+  const normalizedBatch = { id: '2024-2028', label: '2024 — 2028', academicYear: '2024-2028', active: true, description: 'Current Batch' };
+
+  data.batches = [normalizedBatch];
   saveDb(data);
-  res.json({ message: 'Batch updated successfully.', batch: data.batches[index] });
+  res.json({ message: 'Batch updated successfully.', batch: normalizedBatch });
 });
 
 app.delete('/api/batches/:id', authMiddleware, requireRole('admin'), (req, res) => {
   const data = getDb();
-  data.batches = data.batches.filter((b) => b.id !== req.params.id);
+  data.batches = [{ id: '2024-2028', label: '2024 — 2028', academicYear: '2024-2028', active: true, description: 'Current Batch' }];
   saveDb(data);
-  res.json({ message: 'Batch deleted successfully.' });
+  res.json({ message: 'Batch kept as 2024 — 2028.' });
 });
 
 // --- Students Management ---

@@ -19,7 +19,8 @@ import { BlueprintGrid, TechBadge } from '../components/MechanicalDecor';
 export const StudentsPage = ({ onNavigate }) => {
   const [students, setStudents] = useState([]);
   const [batches, setBatches] = useState([]);
-  const [selectedBatch, setSelectedBatch] = useState('ALL');
+  const allowedBatch = '2024 — 2028';
+  const [selectedBatch, setSelectedBatch] = useState(allowedBatch);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState('ALL');
   const [selectedYear, setSelectedYear] = useState('ALL');
@@ -84,26 +85,14 @@ export const StudentsPage = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* Year-Wise Batch Selector Bar */}
+      {/* Single Batch View */}
       <section className="batch-toolbar-section page-width">
         <div className="batch-selection-strip">
-          <span className="batch-strip-label">Select Academic Batch:</span>
+          <span className="batch-strip-label">Academic Batch:</span>
           <div className="batch-chips-container">
-            <button
-              className={`batch-chip-btn ${selectedBatch === 'ALL' ? 'active' : ''}`}
-              onClick={() => setSelectedBatch('ALL')}
-            >
-              All Batches ({students.length})
+            <button className="batch-chip-btn active" type="button" disabled>
+              {allowedBatch} ({students.length})
             </button>
-            {batches.map((b) => (
-              <button
-                key={b.id}
-                className={`batch-chip-btn ${selectedBatch === b.label || selectedBatch === b.id ? 'active' : ''}`}
-                onClick={() => setSelectedBatch(b.label)}
-              >
-                {b.label}
-              </button>
-            ))}
           </div>
         </div>
 

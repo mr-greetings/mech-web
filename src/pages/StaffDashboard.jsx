@@ -31,7 +31,8 @@ export const StaffDashboard = ({ onNavigate }) => {
 
   const [activeTab, setActiveTab] = useState('students'); // 'students' | 'events' | 'uploads' | 'profile'
   const [batches, setBatches] = useState([]);
-  const [selectedBatch, setSelectedBatch] = useState('ALL');
+  const allowedBatch = '2024 — 2028';
+  const [selectedBatch, setSelectedBatch] = useState(allowedBatch);
   const [students, setStudents] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -308,26 +309,14 @@ export const StaffDashboard = ({ onNavigate }) => {
       {/* TAB 1: BATCH-WISE STUDENT MANAGEMENT */}
       {activeTab === 'students' && (
         <section className="page-width dashboard-content-section">
-          {/* Batch Selector Toolbar */}
+          {/* Single Batch Toolbar */}
           <div className="dashboard-batch-toolbar">
             <div className="batch-pick-box">
-              <label>Select Academic Batch to Inspect:</label>
+              <label>Academic Batch:</label>
               <div className="batch-chips-container">
-                <button
-                  className={`batch-chip-btn ${selectedBatch === 'ALL' ? 'active' : ''}`}
-                  onClick={() => setSelectedBatch('ALL')}
-                >
-                  All Batches ({students.length})
+                <button className="batch-chip-btn active" type="button" disabled>
+                  {allowedBatch} ({students.length})
                 </button>
-                {batches.map((b) => (
-                  <button
-                    key={b.id}
-                    className={`batch-chip-btn ${selectedBatch === b.label ? 'active' : ''}`}
-                    onClick={() => setSelectedBatch(b.label)}
-                  >
-                    {b.label}
-                  </button>
-                ))}
               </div>
             </div>
 
