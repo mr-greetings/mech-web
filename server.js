@@ -50,9 +50,15 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
 }
 const missingServerEnvironment = [
   ['JWT_SECRET', JWT_SECRET],
-  ['SUPABASE_URL', supabaseUrl],
-  ['SUPABASE_SERVICE_ROLE_KEY', supabaseServiceKey],
 ].filter(([, value]) => !value?.trim()).map(([name]) => name);
+
+if (supabaseUrl && !supabaseServiceKey) {
+  console.warn('[server] Supabase URL is configured without a service role key; local JSON persistence will remain active for this process.');
+}
+
+if (!supabaseUrl && supabaseServiceKey) {
+  console.warn('[server] Supabase service role key is configured without a URL; local JSON persistence will remain active for this process.');
+}
 const dbDir = path.join(__dirname, 'data');
 const uploadsDir = path.join(__dirname, 'uploads');
 const dbPath = path.join(dbDir, 'db.json');
@@ -2442,6 +2448,20 @@ app.post('/api/upload', authMiddleware, upload.single('file'), async (req, res) 
     },
   });
 });
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ message: 'API route not found.' });
+  }
+  next();
+});
+
+if (fs.existsSync(path.join(__dirname, 'dist'))) {
+  app.use(express.static(path.join(__dirname, 'dist')));
+  app.get(/^(?!\/api\/).*$/, (_req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 // Error handling for Multer and standard errors
 app.use((error, _req, res, _next) => {

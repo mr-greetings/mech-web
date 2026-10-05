@@ -126,6 +126,19 @@
       "staffId": "",
       "registerNumber": "123456789",
       "createdAt": "2026-10-04T15:07:51.387Z"
+    },
+    {
+      "id": "user-1791194600890",
+      "name": "QA Student",
+      "email": "qa.student.1791194600497@example.com",
+      "passwordHash": "$2b$10$VKPXvfy6Xi1zy3ufFuYTsexzhbUlA.nFts7BMMFL9LZgQj9QqcJyG",
+      "role": "student",
+      "phone": "+919999999999",
+      "department": "Mechanical Engineering",
+      "studentId": "student-1791194601307",
+      "staffId": "",
+      "registerNumber": "QA600498",
+      "createdAt": "2026-10-05T10:03:21.307Z"
     }
   ],
   "batches": [],
@@ -217,6 +230,34 @@
         "Engineering Mechanics"
       ],
       "about": "Mechanical engineering undergraduate student at CIET Coimbatore.",
+      "projects": [],
+      "achievements": [],
+      "certificates": [],
+      "eventsParticipated": [],
+      "galleryImages": [],
+      "socialLinks": {
+        "linkedin": "",
+        "github": "",
+        "instagram": ""
+      }
+    },
+    {
+      "id": "student-1791194601307",
+      "userId": "user-1791194600890",
+      "name": "QA Student",
+      "registerNumber": "QA600498",
+      "batch": "2025 — 2029",
+      "academicYear": "2025-2029",
+      "section": "A",
+      "yearOfStudy": "II Year",
+      "email": "qa.student.1791194600497@example.com",
+      "phone": "+919999999999",
+      "profilePhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      "skills": [
+        "CAD Design",
+        "Engineering Mechanics"
+      ],
+      "about": "Updated by QA",
       "projects": [],
       "achievements": [],
       "certificates": [],
