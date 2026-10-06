@@ -4,31 +4,53 @@
       "id": "user-admin-1",
       "name": "Admin Desk",
       "email": "admin@ciet.ac.in",
-      "passwordHash": "$2b$10$tXbchlW14XbEYBC5mglZzO1xpJZS/CDJFi1Tn4.4uhTQvu5GDHx9u",
+      "passwordHash": "$2b$10$zL0twcp1y0GyzF48HtAvaeS8sLpp5QJxzoZQFrkY9vwFJQj.JEOa6",
       "role": "admin",
       "phone": "+91 94430 12345",
       "department": "Mechanical Engineering",
-      "createdAt": "2026-09-25T09:46:20.214Z"
-    },
-   
-    {
-      "id": "user-1790751667393",
-      "name": "Pratheep.V",
-      "email": "pradeep.v.ciet@gmail.com",
-      "passwordHash": "$2b$10$2LA05dbaacJlW0rnup50nuS1d/LO79HBbeIFf2zjczbcYiI2pIK7i",
-      "role": "student",
-      "phone": "882557778",
-      "department": "Mechanical Engineering",
-      "studentId": "student-1790751667491",
-      "staffId": "",
-      "registerNumber": "71052405017",
-      "createdAt": "2026-09-30T07:01:07.491Z"
-    }]}
-    
-    
-
-    
-    
-    
-    
-   
+      "createdAt": "2026-10-06T16:12:52.132Z"
+    }
+  ],
+  "batches": [],
+  "staff": [],
+  "students": [],
+  "events": [],
+  "announcements": [],
+  "brochures": [],
+  "gallery": [],
+  "certificates": [],
+  "alumni": [],
+  "saeClub": {
+    "title": "CIET SAE Collegiate Club (Society of Automotive Engineers)",
+    "motto": "Design. Build. Race. Inspire.",
+    "about": "The CIET SAE Collegiate Club is a premier student-run engineering collective that translates classroom theory into championship-grade race vehicles, electric mobility prototypes, and unmanned aerial crafts. With dedicated fabrication studios, machine tools, and dynamic testing tracks, our teams represent CIET in prestigious international competitions.",
+    "divisions": [],
+    "activities": [],
+    "events": [],
+    "members": [],
+    "achievements": [],
+    "projects": [],
+    "gallery": [],
+    "announcements": [],
+    "resumes": []
+  },
+  "departmentInfo": {
+    "collegeName": "Coimbatore Institute of Engineering and Technology (CIET)",
+    "departmentName": "Department of Mechanical Engineering",
+    "location": "Narasipuram Post, Thondamuthur (via), Coimbatore - 641 109, Tamil Nadu, India",
+    "googleMapsUrl": "https://maps.google.com/?q=CIET+College+Coimbatore+Tamil+Nadu",
+    "contactEmail": "mech@ciet.ac.in",
+    "contactPhone": "+91 422 2970701 / 702",
+    "instagramUrl": "https://instagram.com/ciet_mech_official",
+    "linkedinUrl": "https://linkedin.com/school/ciet-coimbatore",
+    "youtubeUrl": "https://youtube.com/@ciet_coimbatore",
+    "establishedYear": "2001",
+    "vision": "To emerge as a renowned center of excellence in Mechanical Engineering education and research, fostering ethically committed, technically proficient, and innovative engineering leaders capable of advancing sustainable global technologies and serving industrial society.",
+    "mission": [],
+    "curriculum": [],
+    "syllabus": [],
+    "regulations": [],
+    "resumes": []
+  },
+  "resumes": []
+}
