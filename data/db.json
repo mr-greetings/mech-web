@@ -4,7 +4,7 @@
       "id": "user-admin-1",
       "name": "Admin Desk",
       "email": "admin@ciet.ac.in",
-      "passwordHash": "$2b$10$OYUjpzLIYnHlUEXng1TOM.BqDCb11YAVxRylfl70N839kgc4kY6G.",
+      "passwordHash": "$2b$10$tXbchlW14XbEYBC5mglZzO1xpJZS/CDJFi1Tn4.4uhTQvu5GDHx9u",
       "role": "admin",
       "phone": "+91 94430 12345",
       "department": "Mechanical Engineering",
