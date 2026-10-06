@@ -57,6 +57,14 @@ function AppContent() {
         setActiveSection('regulation');
         return;
       }
+      if (hash === 'developers') {
+        setActiveSection('home');
+        setTimeout(() => {
+          const el = document.getElementById('developers');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+        return;
+      }
       if (hash.startsWith('student/')) {
         const regNo = hash.split('student/')[1];
         if (regNo && regNo !== 'resume') {
@@ -83,6 +91,15 @@ function AppContent() {
   }, []);
 
   const navigateTo = (section) => {
+    if (section === 'developers') {
+      setActiveSection('home');
+      window.location.hash = '/developers';
+      setTimeout(() => {
+        const el = document.getElementById('developers');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+      return;
+    }
     setActiveSection(section);
     if (section === 'student-resume') {
       window.location.hash = '/student/resume';

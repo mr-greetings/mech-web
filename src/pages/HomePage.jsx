@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { BlueprintGrid, TechBadge, SectionDivider } from '../components/MechanicalDecor';
+import { DevelopersSection } from '../components/DevelopersSection';
 
 export const HomePage = ({ onNavigate, onSelectEvent }) => {
   const [feedItems, setFeedItems] = useState([]);
@@ -340,6 +341,9 @@ export const HomePage = ({ onNavigate, onSelectEvent }) => {
           </div>
         </div>
       </section>
+
+      {/* Meet the Developers Section */}
+      <DevelopersSection />
     </div>
   );
 };
